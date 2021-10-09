@@ -1,6 +1,7 @@
 import VerticalLayout from './VerticalLayout.js'
 import ErrorPage from "./ErrorPage.js"
 import LoadingPage from "./LoadingPage.js"
+import { descendingOrder  } from "../app/format.js";
 
 import Actions from './Actions.js'
 
@@ -20,6 +21,7 @@ const row = (bill) => {
   }
 
 const rows = (data) => {
+  (data && data.length) ? data = [...data].sort(descendingOrder) : ""
   return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
 }
 

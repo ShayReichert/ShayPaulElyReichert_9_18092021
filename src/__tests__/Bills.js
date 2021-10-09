@@ -1,27 +1,33 @@
 import "@testing-library/jest-dom";
-import { fireEvent, screen } from "@testing-library/dom";
-import BillsUI from "../views/BillsUI.js";
+import { screen } from "@testing-library/dom";
 import { bills } from "../fixtures/bills.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
+import { ROUTES_PATH } from "../constants/routes.js";
+import Router from "../app/Router.js";
+import firestore from "../app/Firestore.js";
+import BillsUI from "../views/BillsUI.js";
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", () => {
-      //to-do write expect expression
 
+      // Firestore Mock
+      jest.mock("../app/Firestore.js");
+      firestore.bills = () => ({ bills, get: jest.fn().mockResolvedValue() });
+
+      // Set localstorage => "Employee"
       Object.defineProperty(window, "localStorage", { value: localStorageMock });
       const user = JSON.stringify({
         type: "Employee",
       });
       window.localStorage.setItem("user", user);
 
-      const html = BillsUI({ data: bills });
-      document.body.innerHTML = html;
+      // Set "/bills" page
+      Object.defineProperty(window, "location", { value: { hash: ROUTES_PATH["Bills"] } });
+      document.body.innerHTML = '<div id="root"></div>';
+      Router();
 
       const billIcon = screen.getByTestId("icon-window");
-      // --- Make the Router.js 's job : correct ?
-      fireEvent.change(billIcon, { target: { className: "active-icon" } });
-
       expect(billIcon).toBeTruthy();
       expect(billIcon).toHaveClass("active-icon");
     });
@@ -35,4 +41,12 @@ describe("Given I am connected as an employee", () => {
       expect(dates).toEqual(datesSorted);
     });
   });
+
+    describe("When I am on Bills page but back-end send an error message", () => {
+      test("Then, Error page should be rendered", () => {
+        const html = BillsUI({ error: "some error message" });
+        document.body.innerHTML = html;
+        expect(screen.getAllByText("Erreur")).toBeTruthy();
+      });
+    });
 });

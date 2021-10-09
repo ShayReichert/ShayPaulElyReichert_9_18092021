@@ -17,3 +17,6 @@ export const formatStatus = (status) => {
       return "Refused"
   }
 }
+
+
+export const descendingOrder = (a, b) => (new Date(a.date) < new Date(b.date) ? 1 : -1);
