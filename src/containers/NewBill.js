@@ -12,9 +12,10 @@ export default class NewBill {
     file.addEventListener("change", this.handleChangeFile);
     this.fileUrl = null;
     this.fileName = null;
-    this.isFileValid = false;
     new Logout({ document, localStorage, onNavigate });
+    this.isFileValid = false;
   }
+
   handleChangeFile = (e) => {
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0];
     const filePath = e.target.value.split(/\\/g);
@@ -22,6 +23,15 @@ export default class NewBill {
 
     if (this.isCorrectFomart(fileName)) {
       this.isFileValid = true;
+      this.storeInFirestore(file, fileName);
+    } else {
+      this.isFileValid = false;
+      console.log("Format d'image non valide !");
+    }
+  };
+
+  storeInFirestore = (file, fileName) => {
+    if (this.firestore) {
       this.firestore.storage
         .ref(`justificatifs/${fileName}`)
         .put(file)
@@ -30,8 +40,6 @@ export default class NewBill {
           this.fileUrl = url;
           this.fileName = fileName;
         });
-    } else {
-      console.log("Format d'image non valide !");
     }
   };
 
@@ -44,7 +52,6 @@ export default class NewBill {
   handleSubmit = (e) => {
     if (!this.isFileValid) return;
     e.preventDefault();
-    console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value);
     const email = JSON.parse(localStorage.getItem("user")).email;
     const bill = {
       email,
